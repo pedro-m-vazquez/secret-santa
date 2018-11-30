@@ -11,7 +11,8 @@ router.get('/users', (req, res) => {
 		include: [{ 
 			model: Users, 
 			as: 'Relationship', 
-			attributes: ['first_name'] 
+			through: {attributes: []},
+			attributes: ['first_name', 'last_name'] 
 		}]
 	}).then((players) => res.status(200).send(players));
 });
