@@ -1,8 +1,5 @@
 'use strict';
 
-const User = require( 'user.js' );
-const GiftList = require( 'giftlist.js' );
-
 module.exports = (sequelize, DataTypes) => {
   const ListItem = sequelize.define('ListItem', {
     name: DataTypes.STRING,
@@ -14,8 +11,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
 
   ListItem.associate = function(models) {
-    ListItem.belongsTo(User, { foreignKey: 'owner_id' });
-    ListItem.belongsTo(GiftList, { foreignKey: 'owner_id' });
+    ListItem.belongsTo(models.User, { foreignKey: 'owner_id' });
+    ListItem.belongsTo(models.GiftList, { foreignKey: 'owner_id' });
   };
   
   return ListItem;

@@ -1,8 +1,5 @@
 'use strict';
 
-const SecretSantaGroup = require( 'secretsantagroup.js' );
-const User = require( 'user.js' );
-
 module.exports = (sequelize, DataTypes) => {
   const SantaGroupMappings = sequelize.define('SantaGroupMappings', {
     group_id: DataTypes.INTEGER,
@@ -12,9 +9,9 @@ module.exports = (sequelize, DataTypes) => {
 
   SantaGroupMappings.associate = function(models) {
     
-    SantaGroupMappings.belongsTo(SecretSantaGroup, { foreignKey: 'group_id' });
+    SantaGroupMappings.belongsTo(models.SecretSantaGroup, { foreignKey: 'group_id' });
 
-    SantaGroupMappings.belongsTo(User, { foreignKey: 'gifter_id' });
+    SantaGroupMappings.belongsTo(models.User, { foreignKey: 'gifter_id' });
   };
 
   return SantaGroupMappings;

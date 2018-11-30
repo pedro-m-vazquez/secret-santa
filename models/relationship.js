@@ -1,7 +1,5 @@
 'use strict';
 
-const User = require( 'user.js' );
-
 module.exports = (sequelize, DataTypes) => {
   const Relationship = sequelize.define('Relationship', {
     user1_id: DataTypes.INTEGER,
@@ -10,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
 
   Relationship.associate = function(models) {
-    Relationship.belongsTo(User);
+    Relationship.belongsTo(models.User);
   };
 
   return Relationship;
