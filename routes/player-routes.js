@@ -1,28 +1,28 @@
 const db = require('../models');
-const Players = db.Player;
+const Users = db.User;
 const SecretSantas = db.SecretSantas;
 
 var express = require('express')
 var router = express.Router()
 
-router.get('/players', (req, res) => {
-	Players.findAll({
-		attributes: ['id', 'name', 'chosenTimes'], 
+router.get('/users', (req, res) => {
+	Users.findAll({
+		attributes: ['id', 'first_name', 'last_name', 'email'], 
 		include: [{ 
-			model: Players, 
+			model: Users, 
 			as: 'Relationship', 
-			attributes: ['name'] 
+			attributes: ['first_name'] 
 		}]
 	}).then((players) => res.status(200).send(players));
 });
 
 
 router.get('/players/:id', (req, res) => {
-	Players.findOne({
+	Users.findOne({
 		where: { id: req.params.id },
 		attributes: ['id', 'name', 'chosenTimes'], 
 		include: [{ 
-			model: Players, 
+			model: Users, 
 			as: 'Relationship', 
 			attributes: ['name'] 
 		}]
@@ -31,11 +31,11 @@ router.get('/players/:id', (req, res) => {
 
 
 router.get('/players/:id/results', (req, res) => {
-	Players.findOne({
+	Users.findOne({
 		where: { id: req.params.id },
 		attributes: ['name'], 
 		include: [{ 
-			model: Players, 
+			model: Users, 
 			as: 'Giftees', 
 			attributes: ['name'] 
 		}]
@@ -43,10 +43,10 @@ router.get('/players/:id/results', (req, res) => {
 });
 
 router.get('/secret-santa', (req, res) => {
-	Players.findAll({
+	Users.findAll({
 		attributes: ['id', 'name'], 
 		include: [{ 
-			model: Players, 
+			model: Users, 
 			as: 'Giftees', 
 			attributes: ['name'] 
 		}]
@@ -54,11 +54,11 @@ router.get('/secret-santa', (req, res) => {
 });
 
 router.get('/secret-santa/:id', (req, res) => {
-	Players.findOne({
+	Users.findOne({
 		where: { id: req.params.id },
 		attributes: ['name'], 
 		include: [{ 
-			model: Players, 
+			model: Users, 
 			as: 'Giftees', 
 			attributes: ['name'] 
 		}]
@@ -71,7 +71,7 @@ router.get('/play', (req, res) => {
 	  where: {},
 	  truncate: true
 	}).then( async () => {
-		let playerList = await Players.findAll();
+		let playerList = await Users.findAll();
 		let resultsArray = [];
 
 		playerList.forEach((currentPlayer) => {
@@ -79,10 +79,9 @@ router.get('/play', (req, res) => {
 			let count = playerList.length;
 			let amountToChoose = 3;
 
-			if ( req.query.code !== currentPlayer.code ) {
-				res.status(200).send({ message: "Failed" });
-				process.exit();
-			}
+			// if ( req.query.code !== currentPlayer.code ) {
+			// 	res.status(200).send({ message: "Failed" });
+			// }
 
 			for ( let i = 0; i < amountToChoose && playerList.length > 0; ) {
 				let resultIndex = Math.floor( Math.random() * (playerList.length) );
