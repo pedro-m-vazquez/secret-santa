@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Capy Friendsgiving</title>
+</head>
+<body>
+	<div class="participant-section">
+		<h2>Possible Giftees</h2>
+		<ul class="players">
+		</ul>
+
+		<h2>Chosen Selections</h2>
+		<ul class="selections">
+		</ul>
+	</div>
+	<div class="player-section">
+		<select class="currentPlayerList">
+		</select>
+		<label for="player-code">Code</label>
+		<input type="text" name="player-code" value="123">
+		<button id="playButton">Play</button>
+	</div>
+	<div class="gifts-section">
+		<ul class="results"></ul>
+	</div>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		let getPlayersFromDB = async () => {
+			return $.get("http://localhost:8000/api/players");
+		}
+		let getSantaListFromDB = async () => {
+			return $.get("http://localhost:8000/api/secret-santa");
+		}
+
+		let updatePlayerChosenCount = ( playerList, playerChosen) => {
+			for ( let i = 0; i < playerList.length; i++ ) {
+				if ( playerList[i].name === playerChosen ) {
+					playerList[i].chosenTimes = playerList[i].chosenTimes + 1;
+					return playerList;
+				}
+			}
+		}
+
+		let playerList 	= [],
+			santaList 	= [],
+			resultsBox = $(".gifts-section .results"),
+			choiceOptions = $(".participant-section .players"),
+			chosenOptions = $(".participant-section .selections"),
+			playerOptions = $(".player-section .currentPlayerList"),
+			masterPlayerList = null,
+			pickablePlayers = [];
+
+		let initApp = async () => {
+			playerList = await getPlayersFromDB();
+			santaList = await getSantaListFromDB();
+
+			playerList.forEach((val, i) => {
+				// Only available if not chosen 3 times already
+				if ( val.chosenTimes < 3 ) {
+					pickablePlayers.push(val);
+					choiceOptions.append("<li>" + val.name + " - Chosen: " + val.chosenTimes + "</li>");
+				}
+			});
+
+			santaList.forEach((val, i) => {
+				// Only available if not chosen 3 times already
+				if ( val.Giftees.length == 0 )
+					playerOptions.append("<option>" + val.name + "</option>");
+				else {
+					chosenOptions.append("<li>" + val.name + " - " + val.Giftees + "</li>");
+				}
+			});
+		}
+
+		initApp();
+
+			
+
+		var findPlayerObj = (name) => {
+			for (let i = 0; i < masterPlayerList.length; i++) {
+				let playerObj = masterPlayerList[i];
+				if (name === playerObj.name)
+					return playerObj;
+			}
+		}
+
+		var validateCode = code => {
+			return ! code;
+		}
+
+		var checkRelationshipValues = (name, possibleGiftee) => {
+			let player = findPlayerObj(name);
+
+			return player.relationship !== possibleGiftee;
+		}
+
+		$("#playButton").on("click", () => {
+			let playerList = pickablePlayers,
+				currentPlayer = $("select.currentPlayerList option:selected").val(),
+				playerCode = $(".player-section input[name=player-code]").val(),
+				count = playerList.length,
+				amountToChoose = 3,
+				resultsArray = [];
+
+			if ( ! validateCode( playerCode) ) {
+				alert("Code can not be empty");
+				return false;
+			}
+
+			// Clear Previous results
+			resultsBox.empty();
+
+			for ( let i = 0; i < amountToChoose && playerList.length > 0; ) {
+				let resultIndex = Math.floor( Math.random() * (playerList.length) );
+				let playerChosenName = playerList[resultIndex].name;
+
+				if ( playerChosenName === currentPlayer ||  ! checkRelationshipValues(currentPlayer, playerChosenName) )
+					continue;
+				else 
+					i++;
+
+				resultsArray.push( playerChosenName );
+				playerList.splice(resultIndex, 1);
+			}
+
+
+			savePlayerChoices( currentPlayer, resultsArray );
+
+			resultsArray.forEach((val) => {
+				resultsBox.append("<li>" + val + "</li>");
+			});
+
+			// Refresh Page
+			document.location = document.location;
+		});
+	</script>
+</body>
+</html>
